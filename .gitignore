@@ -1,5 +1,9 @@
 # custom
 no_git/
+*.zip
+*.rar
+*.7z
+*.tar.gz
 
 # laravel base
 *.log

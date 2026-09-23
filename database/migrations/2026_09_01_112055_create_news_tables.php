@@ -42,6 +42,14 @@ return new class extends Migration
             $table->foreignId('article_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
         });
+
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('article_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('content');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -49,6 +57,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('comments');
         Schema::dropIfExists('article_tag');
         Schema::dropIfExists('tags');
         Schema::dropIfExists('articles');

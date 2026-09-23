@@ -7,9 +7,6 @@ use App\Http\Controllers\Base\BaseCategoryController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminCategoryController extends Controller
@@ -45,8 +42,7 @@ class AdminCategoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
-        $data['slug'] = $this->uniqueSlug($data['name']);
-        Category::create($data);
+        $this->common->createCategory($data);
         return redirect()->route('admin.categories.index')->with('status', 'Категория создана.');
     }
 
@@ -68,10 +64,7 @@ class AdminCategoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
-        if ($data['name'] !== $category->name) {
-            $data['slug'] = $this->uniqueSlug($data['name'], $category->id);
-        }
-        $category->update($data);
+        $this->common->updateCategory($category, $data);
         return redirect()->route('admin.categories.index')->with('status', 'Категория обновлена.');
     }
 
@@ -81,7 +74,7 @@ class AdminCategoryController extends Controller
     public function destroy(string $category_slug): RedirectResponse
     {
         $category = $this->common->getCategoryBySlug($category_slug);
-        $category->delete();
+        $this->common->deleteCategory($category);
         return redirect()->route('admin.categories.index')->with('status', 'Категория удалена.');
     }
 }

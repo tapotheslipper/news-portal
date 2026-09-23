@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Base;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
+use App\Http\Controllers\Helpers\ControllerHelpers;
 
 class BaseCategoryController
 {
@@ -21,59 +23,20 @@ class BaseCategoryController
         return Category::where('slug', $slug)->firstOrFail();
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+    public function createCategory(array $data): Category {
+        $data['slug'] = ControllerHelpers::uniqueSlug($data['name'], Category::class);
+        return Category::create($data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    public function updateCategory(Category $category, array $data): Category {
+        if (isset($data['name']) && $data['name'] !== $category->name) {
+            $data['slug'] = ControllerHelpers::uniqueSlug($data['name'], Category::class, $category->id);
+        }
+        $category->update($data);
+        return $category;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Category $category)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Category $category)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Category $category)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Category $category)
-    {
-        //
+    public function deleteCategory(Category $category): bool {
+        return (bool) $category->delete();
     }
 }

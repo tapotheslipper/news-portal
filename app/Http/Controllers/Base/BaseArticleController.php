@@ -4,11 +4,20 @@ namespace App\Http\Controllers\Base;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
+use App\Http\Controllers\Helpers\ControllerHelpers;
 
 class BaseArticleController
 {
-    public function getPaginatedArticles(?string $category_slug = null, ?string $tag_slug = null, bool $onlyPublished = true, int $perPage = 10): LengthAwarePaginator {
+    public function getPaginatedArticles(
+        ?string $category_slug = null,
+        ?string $tag_slug = null,
+        ?string $search = null,
+        bool $onlyPublished = true,
+        int $perPage = 10
+    ):LengthAwarePaginator {
         return Article::query()
             ->when($onlyPublished, function ($query) {
                 $query->where('is_published', true);
@@ -23,6 +32,9 @@ class BaseArticleController
                     $q->where('slug', $tag_slug);
                 });
             })
+            ->when($search, function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            })
             ->latest()->paginate($perPage);
     }
 
@@ -32,29 +44,40 @@ class BaseArticleController
                 $query->where('is_published', true);
             })->firstOrFail();
     }
-    
-    public function create()
-    {
-        //
+
+    public function createArticle(array $data, ?UploadedFile $image, array $tagIds, int $userId): Article {
+        $data['slug'] = ControllerHelpers::uniqueSlug($data['title'], Article::class);
+        $data['user_id'] = $userId;
+
+        if ($image) {
+            $data['image'] = $this->storeImage($image);
+        }
+        $article = Article::create($data);
+        $article->tags()->sync($tagIds);
+        return $article;
     }
 
-    public function store(Request $request)
-    {
-        //
+    public function updateArticle(Article $article, array $data, ?UploadedFile $image, array $tagIds): Article {
+        if (isset($data['title']) && $data['title'] !== $article->title) {
+            $data['slug'] = ControllerHelpers::uniqueSlug($data['title'], Article::class, $article->id);
+        }
+        if ($image) {
+            $data['image'] = $this->storeImage($image);
+        }
+        $article->update($data);
+        $article->tags()->sync($tagIds);
+        return $article;
     }
 
-    public function edit(Article $article)
-    {
-        //
+    public function deleteArticle(Article $article): bool {
+        return (bool) $article->delete();
     }
 
-    public function update(Request $request, Article $article)
-    {
-        //
-    }
-
-    public function destroy(Article $article)
-    {
-        //
+    protected function storeImage(UploadedFile $image): string {
+        return $image->storeAs(
+            'articles',
+            Str::uuid()->toString() . '.' . $image->extension(),
+            'public'
+        );
     }
 }

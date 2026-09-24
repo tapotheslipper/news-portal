@@ -43,8 +43,21 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="tags" class="form-label">Теги (через запятую)</label>
-                        <input id="tags" type="text" name="tags" class="form-control" value="{{ old('tags', $article->exists ? $article->tags->pluck('name')->join(', ') : '') }}">
+                        <label for="tags" class="form-label">Теги</label>
+                        @forelse ($tags as $tag)
+                            @php($checkedTags = old('tags', $article->exists ? $article->tags->pluck('id')->all() : []))
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="tags[]" id="tag_{{ $tag->id }}" value="{{ $tag->id }}" @checked(in_array($tag->id, $checkedTags))>
+                                <label class="form-check-label" for="tag_{{ $tag->id }}">{{ $tag->name }}</label>
+                            </div>
+                        @empty
+                            <p class="text-muted small mb-0">Тегов пока нет.</p>
+                            <a href="{{ route('admin.tags.create') }}">Добавить тег</a>
+                        @endforelse
+
+                        @error('tags')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">

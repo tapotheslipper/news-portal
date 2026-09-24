@@ -24,6 +24,25 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="h5">Теги</h2>
+                        <p class="text-muted">Теги (Tags)</p>
+                        <a href="{{ route('admin.tags.index') }}" class="btn btn-primary btn-sm">Управлять тегами (Tags)</a>
+                        <a href="{{ route('admin.tags.create') }}" class="btn btn-outline-primary btn-sm">Добавить тег (Tag)</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="h5">Комментарии</h2>
+                        <p class="text-muted">Комментарии (Comments)</p>
+                        <a href="{{ route('admin.comments.index') }}" class="btn btn-primary btn-sm">Управлять комментариями (Comments)</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
